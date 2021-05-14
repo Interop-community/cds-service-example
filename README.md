@@ -15,6 +15,7 @@ $ docker run -p 5000:5000 -d --rm <your-name>/cds-service-example-python
 # To build and push to ecs
 
 ## Create image repo in ecr 
+
 ```
 aws ecr create-repository --repository-name iol2/cds-service-example 
 ````
