@@ -12,9 +12,9 @@ Successfully built <container-id>
 $ docker run -p 5000:5000 -d --rm <your-name>/cds-service-example-python
 ```
 
-# To build and push to ecs
+# To build and push to ECR
 
-## Create image repo in ecr 
+## Create image repo in ECR 
 
 ```
 aws ecr create-repository --repository-name iol2/cds-service-example 
