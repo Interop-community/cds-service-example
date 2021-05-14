@@ -28,7 +28,7 @@ def discovery():
                 'description': 'An example static CDS service in Python',
                 'id': 'static',
                 'prefetch': {
-                    'patient': 'Patient/{{Patient.id}}'
+                    'patient': "Patient/{{context.patientId}}"
                 }
             },
             {
@@ -37,9 +37,8 @@ def discovery():
                 "description": "Display which patient the user is currently working with",
                 "hook": "patient-view",
                 "prefetch": {
-                    "patient": "Patient/{{context.patientId}}",
-                    "appointments": "Encounter?patient={{context.patientId}}"
-                }
+                    "patient": "Patient/{{context.patientId}}"
+                    }
             },
              {
                 "id": "patient-order-select",
