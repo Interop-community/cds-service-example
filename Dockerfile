@@ -1,5 +1,4 @@
-FROM python:2.7
-MAINTAINER Matt Berther
+FROM python:3.8
 
 RUN mkdir -p /app
 WORKDIR /app
