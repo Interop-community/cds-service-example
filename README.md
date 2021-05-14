@@ -2,7 +2,7 @@
 
 Simple Python and Flask server that acts as a CDS Service
 
-## Usage
+## To build and run locally
 This card service can be deployed with docker. By default, the Dockerfile exposes port 5000. Creating the docker container can be done by:
 
 ```bash
@@ -12,16 +12,21 @@ Successfully built <container-id>
 $ docker run -p 5000:5000 -d --rm <your-name>/cds-service-example-python
 ```
 
-## To build and push to ecs
+# To build and push to ecs
 
-# Build Docker Image
+## Create image repo in ecr 
+```
+aws ecr create-repository --repository-name iol2/cds-service-example 
+````
+
+## Build Docker Image
 
 ```
 docker build -t 745222113226.dkr.ecr.us-east-1.amazonaws.com/iol2/cds-service-example:latest .
 ```
 
 
-# Login to ECR from Docker cli
+## Login to ECR from Docker cli
 
 ```
 cliversion=$(aws --version)
@@ -29,7 +34,7 @@ cliversion=$(aws --version)
 [[ $cliversion = aws-cli/2* ]] && aws ecr get-login-password --profile $1| docker login --username AWS --password-stdin  ${ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 ```
 
-# Push Docker Image to AWS ECR with tag
+## Push Docker Image to AWS ECR with tag
 ```
 docker push 745222113226.dkr.ecr.us-east-1.amazonaws.com/iol2/cds-service-example:latest
 ```
