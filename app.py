@@ -38,15 +38,16 @@ def discovery():
                 "hook": "patient-view",
                 "prefetch": {
                     "patient": "Patient/{{context.patientId}}"
-                    }
+                }
             },
-             {
-                "id": "patient-order-select",
-                "title": "Patient bundle",
-                "description": "Display patient related data",
-                "hook": "order-select"
-            },
-              {
+        #  {
+        #         "id": "patient-order-select",
+        #         "title": "Patient bundle",
+        #         "description": "Display patient related data",
+        #         "hook": "order-select",
+        #         "selection": ["MedicationRequest?patient={{context.patientId}}", "NutritionOrder?patient={{context.patientId}}", "Condition?patient={{context.patientId}}"]
+        #     },
+            {
                 "id": "complete-patient-history",
                 "title": "Complete medical history",
                 "description": "Display patient related data",
@@ -58,13 +59,13 @@ def discovery():
                 "description": "Display patient related immunization data",
                 "hook": "patient-view"
             },
-              {
+            {
                 "id": "patient-allergy",
                 "title": "AllergyIntolerance history",
                 "description": "Display patient related allergy data",
                 "hook": "patient-view"
             },
-               {
+            {
                 "id": "patient-documentreference",
                 "title": "Patient DocumentReference",
                 "description": "Display patient related document reference data",
@@ -125,7 +126,7 @@ def greeting():
                     "source": {
                         "label": "Patient greeting service"
                     },
-                    "indicator": (lambda: ["info","warning", "critical"][random.randint(0,2)])()
+                    "indicator": (lambda: ["info", "warning", "critical"][random.randint(0, 2)])()
                 }
             ]
         }
@@ -135,14 +136,14 @@ def greeting():
     return Response(json.dumps(cards), 200)
 
 
-
 def get_fhirVersion(endpoint):
     return requests.get(endpoint+'/metadata').json()['fhirVersion']
 
+
 @app.route('/cds-services/patient-order-select', methods=['POST'])
 def pos():
-  print(request.json)
-  return Response(json.dumps(request.json), 200)
+    print(request.json)
+    return Response(json.dumps(request.json), 200)
 
 
 # @app.route('/cds-services/patient-visit', methods=['POST'])
@@ -151,9 +152,12 @@ def pos():
 #   return Response(json.dumps(request.json), 200)
 
 
-_RESTcall = lambda method, endpoint, headers, data={} : requests.request(method, endpoint, headers=headers, data=data)
+_RESTcall = lambda method, endpoint, headers, data={}: requests.request(
+    method, endpoint, headers=headers, data=data)
 
-patient_name=''
+patient_name = ''
+
+
 @app.route('/cds-services/complete-patient-history', methods=['POST'])
 def drill():
 
@@ -172,32 +176,37 @@ def drill():
 
     return Response(json.dumps({"cards": [entry2card(e) for e in entry]}), 200)
 
-track_count={}
+
+track_count = {}
+
+
 def entry2card(entry: dict):
     global patient_name
     card = dict()
-    card['indicator'] = (lambda: ["info","warning", "critical"][random.randint(0,2)])()
+    card['indicator'] = (
+        lambda: ["info", "warning", "critical"][random.randint(0, 2)])()
     if entry['resource']['resourceType'] not in track_count:
         if entry['resource']['resourceType'] != "Patient":
             track_count[entry['resource']['resourceType']] = 1
         else:
             patient_name = entry['resource']['name'][0]['given'][0]
     else:
-         track_count[entry['resource']['resourceType']] += 1
+        track_count[entry['resource']['resourceType']] += 1
 
-    card['summary'] = patient_name +'\'s '+ str(track_count[entry['resource']['resourceType']]) + _num_suffix(track_count[entry['resource']['resourceType']]) + ' ' + entry['resource']['resourceType'] if entry['resource']['resourceType'] != "Patient" else patient_name
+    card['summary'] = patient_name + '\'s ' + str(track_count[entry['resource']['resourceType']]) + _num_suffix(
+        track_count[entry['resource']['resourceType']]) + ' ' + entry['resource']['resourceType'] if entry['resource']['resourceType'] != "Patient" else patient_name
 
     card['source'] = {
-        "label" : entry['resource']['resourceType'],
-        "url" : entry["fullUrl"]
+        "label": entry['resource']['resourceType'],
+        "url": entry["fullUrl"]
     }
     card['suggestions'] = [{
-        "label" : "Human-readalbe label",
+        "label": "Human-readalbe label",
         "action":  [entry['resource']['text']]
     }]
     card['links'] = [{
-        "label" : "Complete patient medical history",
-        "type" : entry['resource']['meta']
+        "label": "Complete patient medical history",
+        "type": entry['resource']['meta']
     }]
 
     return card
@@ -216,14 +225,14 @@ def immunize():
     cards = []
     if response['total']:
         for et in response['entry']:
-                cards.append({
-            'summary': et['resource']['code']['text'],
-            'source': [{'label' : et['resource']['resourceType'],
-            'suggestions': [{'label': et['resource']["verificationStatus"]['coding'][0]['code']}],
-            'links': [{'label': et["fullUrl"]}]
+            cards.append({
+                'summary': et['resource']['code']['text'],
+                'source': [{'label': et['resource']['resourceType'],
+                            'suggestions': [{'label': et['resource']["verificationStatus"]['coding'][0]['code']}],
+                            'links': [{'label': et["fullUrl"]}]
 
-                }]
-                })
+                            }]
+            })
     return Response(json.dumps({"cards": cards}), 200)
 
 
@@ -270,13 +279,15 @@ def documentreference():
             })
     return Response(json.dumps({"cards": cards}), 200)
 
+
 def _num_suffix(num):
-    suffix  = ["th", "st", "nd", "rd"]
+    suffix = ["th", "st", "nd", "rd"]
     return suffix[num % 10] if num % 10 in [1, 2, 3] and num not in [11, 12, 13] else suffix[0]
 
 
 def _get_auth_from_hook(fhirAuthorization: dict):
     return fhirAuthorization['token_type'] + ' ' + fhirAuthorization['access_token']
-    
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
